@@ -7,14 +7,26 @@ dotenv.config();
 
 const app = express();
 
+const allowedOrigins = [
+  "http://127.0.0.1:3000",
+  "http://localhost:3000"
+];
+
 app.use(cors({
-  origin: ["http://127.0.0.1:3000", "http://localhost:3000"],
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   methods: ["GET", "POST", "OPTIONS"],
-  allowedHeaders: ["Content-Type"]
+  allowedHeaders: ["Content-Type"],
 }));
 
-app.use(express.json());
 app.options("*", cors());
+
+app.use(express.json());
 
 app.post("/signup", async (req, res) => {
   const {
