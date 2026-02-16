@@ -7,11 +7,14 @@ dotenv.config();
 
 const app = express();
 
+// Allowed origins for CORS
 const allowedOrigins = [
   "http://127.0.0.1:3000",
-  "http://localhost:3000"
+  "http://localhost:3000",
+  "https://yourdomain.com" // replace with your live site domain
 ];
 
+// CORS setup
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
@@ -21,11 +24,12 @@ app.use(cors({
     }
   },
   methods: ["GET", "POST", "OPTIONS"],
-  allowedHeaders: ["Content-Type"],
+  allowedHeaders: ["Content-Type"]
 }));
 
 app.use(express.json());
 
+// Signup route
 app.post("/signup", async (req, res) => {
   const {
     name,
@@ -40,15 +44,19 @@ app.post("/signup", async (req, res) => {
 
   try {
     const transporter = nodemailer.createTransport({
-        host: "smtp.gmail.com",
-        port: 587,
-        secure: false, // use STARTTLS
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS
-        }
-      });
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false, // STARTTLS
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      },
+      tls: {
+        rejectUnauthorized: false
+      }
+    });
 
+    // Email to you
     await transporter.sendMail({
       from: `"Course Signup" <${process.env.EMAIL_USER}>`,
       to: process.env.EMAIL_USER,
@@ -66,6 +74,7 @@ app.post("/signup", async (req, res) => {
       `
     });
 
+    // Confirmation email to user
     await transporter.sendMail({
       from: `"Ilya Soccer" <${process.env.EMAIL_USER}>`,
       to: email,
@@ -79,8 +88,8 @@ app.post("/signup", async (req, res) => {
 
     res.status(200).json({ success: true });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false });
+    console.error("Email sending failed:", err);
+    res.status(500).json({ success: false, error: "Email sending failed" });
   }
 });
 
