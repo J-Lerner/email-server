@@ -6,12 +6,15 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
+
 app.use(cors({
-    origin: "*",
-    methods: ["GET", "POST"],
-    allowedHeaders: ["Content-Type"]
-  }));
+  origin: ["http://127.0.0.1:3000", "http://localhost:3000"],
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type"]
+}));
+
 app.use(express.json());
+app.options("*", cors());
 
 app.post("/signup", async (req, res) => {
   const {
@@ -69,7 +72,6 @@ app.post("/signup", async (req, res) => {
   }
 });
 
-app.options("*", cors());
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
